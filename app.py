@@ -9,7 +9,12 @@ from fastapi.staticfiles import StaticFiles
 from detect import detect_image
 
 app = FastAPI()
+
+# ✅ Ensure results directory exists (IMPORTANT for Render)
+os.makedirs("results", exist_ok=True)
+
 app.mount("/results", StaticFiles(directory="results"), name="results")
+
 # Allow frontend access
 app.add_middleware(
     CORSMiddleware,

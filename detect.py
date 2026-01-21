@@ -1,9 +1,8 @@
-from ultralytics import YOLO
-from PIL import Image
 import os
+from ultralytics import YOLO
 
-MODEL_PATH = "models/civic_yolo.pt"
-UPLOAD_DIR = "uploads"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "models", "civic_yolo.pt")
 
 CONF_THRESHOLD = 0.75
 VALID_CLASSES = ["garbage", "pothole", "broken_streetlight"]
@@ -20,14 +19,17 @@ def detect_image(image_path: str):
     )
 
     detections = []
+    output_image = None
 
     for r in results:
+        if r.save_dir:
+            output_image = os.path.join(r.save_dir, os.path.basename(image_path))
+
         for box in r.boxes:
             cls_id = int(box.cls[0])
             confidence = float(box.conf[0])
             label = model.names[cls_id]
 
-            # 🚫 Reject non-civic issues
             if label not in VALID_CLASSES:
                 continue
 
@@ -41,12 +43,6 @@ def detect_image(image_path: str):
             })
 
     if not detections:
-        return {
-            "status": "rejected",
-            "reason": "No valid civic issue detected"
-        }
+        return [], None
 
-    return {
-        "status": "success",
-        "detections": detections
-    }
+    return detections, output_image

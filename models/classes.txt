@@ -1,0 +1,4 @@
+garbage
+pothole
+broken_streetlight
+other
